@@ -1,11 +1,32 @@
 import { useState } from "react"
+import toast from "react-hot-toast"
+import { TailSpin } from 'react-loader-spinner'
+
+
+
+const EMAIL = "admin@fairmd.com"
+const PASSWORD = "shouryaLovesPratham"
 
 export default function Example() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
     const [isSignup, setIsSignup] = useState(false)
     const handleSignup = () => {
         setIsSignup(!isSignup)
+    }
+    const handleLogin = () => {
+        setIsLoading(true)
+        setTimeout(() => {
+            if (email === EMAIL && password === PASSWORD) {
+                setIsLoading(false)
+                console.log("Logged in")
+            } else {
+                setIsLoading(false)
+                toast.error("Invalid credentials")
+                console.log("Invalid credentials")
+            }
+        }, 3000)
     }
     return (
         <>
@@ -75,9 +96,10 @@ export default function Example() {
                         <div>
                             <button
                                 type="submit"
+                                onClick={handleLogin}
                                 className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                             >
-                                Sign in
+                                {isLoading && <TailSpin height={20} width={20} color="white" />}   {isLoading ? "Loading.." : "Login"}
                             </button>
                         </div>
                     </form>
