@@ -1,6 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import React from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 interface SubFactor {
     sub_factor: string | null
@@ -16,53 +18,120 @@ interface BiasFactor {
 }
 
 interface BiasAnalysisProps {
-    detailed_bias_analysis: BiasFactor[]
+    detailedBiasAnalysis: BiasFactor[]
 }
 
-export default function BiasAnalysisDashboard({ detailed_bias_analysis }: BiasAnalysisProps) {
+const BiasAnalysisUI: React.FC<BiasAnalysisProps> = ({ detailedBiasAnalysis }) => {
+    const [expandedFactors, setExpandedFactors] = React.useState<Record<string, boolean>>({})
+
+    const toggleFactor = (factor: string) => {
+        setExpandedFactors(prev => ({ ...prev, [factor]: !prev[factor] }))
+    }
+
+    const getScoreColor = (score: number) => {
+        if (score >= 0.7) return 'bg-red-500'
+        if (score >= 0.5) return 'bg-yellow-500'
+        return 'bg-green-500'
+    }
+
     return (
-        <div className="container mx-auto ">
-            <div className="grid gap-6 md:grid-cols-2">
-                {detailed_bias_analysis.map((factor, index) => (
-                    <Card key={index} className="w-full bg-black/50 p-0 border-none">
-                        <CardHeader>
-                            <CardTitle className="text-white text-lg  font-semibold">{factor.bias_factor}</CardTitle>
-                            <CardDescription>
-                                Average Score: {(factor.sub_factors.reduce((acc, sf) => acc + sf.score, 0) / factor.sub_factors.length).toFixed(2)}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Accordion type="single" collapsible className="w-full">
-                                {factor.sub_factors.map((subFactor, subIndex) => (
-                                    <AccordionItem className="text-white" key={subIndex} value={`item-${index}-${subIndex}`}>
-                                        <AccordionTrigger>
-                                            {subFactor.sub_factor || factor.bias_factor}
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="space-y-2">
-                                                <div>
-                                                    <span className="font-semibold">Score:</span>
-                                                    <Progress value={subFactor.score * 100} className="mt-2" />
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold">Evidence:</span> {subFactor.evidence}
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold">Impact Assessment:</span> {subFactor.impact_assessment}
-                                                </div>
-                                                <div>
-                                                    <span className="font-semibold">Recommendations:</span> {subFactor.recommendations}
-                                                </div>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+        <div className="container mx-auto mt-12 p-4 space-y-4">
+            <h1 className="text-xl font-semubold mb-4">Bias Breakdown</h1>
+            {detailedBiasAnalysis.map((factor, index) => (
+                <Card key={index} className="w-full bg-black/20 p-0 border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                        <CardTitle className="text-lg font-medium text-white">{factor.bias_factor}</CardTitle>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className='bg-gray-700 text-white'
+                            onClick={() => toggleFactor(factor.bias_factor)}
+                        >
+                            {expandedFactors[factor.bias_factor] ? <ChevronUp /> : <ChevronDown />}
+                        </Button>
+                    </CardHeader>
+                    <CardContent className='text-white flex flex-col gap-4'>
+                        {expandedFactors[factor.bias_factor] && factor.sub_factors.map((subFactor, subIndex) => (
+                            <div key={subIndex} className="mt-4 space-y-4">
+                                <h3 className="font-medium">{subFactor.sub_factor || factor.bias_factor}</h3>
+                                <div className="flex items-center space-x-2 mt-4">
+                                    <Progress value={subFactor.score * 100} className={`w-full ${getScoreColor(subFactor.score)}`} />
+                                    <span className="text-sm font-medium">{(subFactor.score * 100).toFixed(0)}%</span>
+                                </div>
+                                <p className="text-sm"><strong>Evidence:</strong> {subFactor.evidence}</p>
+                                <p className="text-sm"><strong>Impact:</strong> {subFactor.impact_assessment}</p>
+                                <p className="text-sm"><strong>Recommendations:</strong> {subFactor.recommendations}</p>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            ))}
         </div>
     )
+}
+
+export default BiasAnalysisUI
+
+// Example usage
+const detailedBiasAnalysis = [
+    {
+        "bias_factor": "Access Disparities",
+        "sub_factors": [
+            {
+                "sub_factor": "Geographical Location",
+                "score": 0.70,
+                "evidence": "Patient from rural area faced multiple connection issues during the consultation.",
+                "impact_assessment": "Poor connectivity leads to incomplete consultations and potential miscommunication, adversely affecting health outcomes.",
+                "recommendations": "Deploy local telemedicine kiosks with reliable internet or provide subsidized connectivity solutions in rural areas."
+            },
+            {
+                "sub_factor": "Internet Connectivity",
+                "score": 0.75,
+                "evidence": "Patient reported poor internet connectivity quality affecting consultation clarity.",
+                "impact_assessment": "Interruptions can cause significant information loss leading to incorrect treatment adherence.",
+                "recommendations": "Optimize telemedicine platform for low-bandwidth conditions and introduce offline features."
+            }
+        ]
+    },
+    {
+        "bias_factor": "Technological Literacy",
+        "sub_factors": [
+            {
+                "sub_factor": null,
+                "score": 0.60,
+                "evidence": "Patient struggled with setting up a stable video connection, requiring multiple attempts.",
+                "impact_assessment": "Limited technological skills can lead to frustration and decreased utilization of telemedicine services.",
+                "recommendations": "Implement user-friendly interfaces and provide training sessions or technical assistance for elderly patients."
+            }
+        ]
+    },
+    {
+        "bias_factor": "Socioeconomic Status",
+        "sub_factors": [
+            {
+                "sub_factor": null,
+                "score": 0.65,
+                "evidence": "Low-income status correlates with the patient's poor internet quality and lack of equipment.",
+                "impact_assessment": "Cost barriers affect the ability to access necessary technology for effective telemedicine use.",
+                "recommendations": "Offer financial assistance programs for equipment and internet costs to low-income patients."
+            }
+        ]
+    },
+    {
+        "bias_factor": "Age Bias",
+        "sub_factors": [
+            {
+                "sub_factor": "Elderly Patients",
+                "score": 0.55,
+                "evidence": "Elderly patient had difficulties in understanding the consultation due to technological constraints.",
+                "impact_assessment": "Older patients might face compounded challenges with technology, affecting their health management.",
+                "recommendations": "Enhance educational outreach tailored for elderly patients on telemedicine usage and offer consistent support."
+            }
+        ]
+    }
+]
+
+export function BiasAnalysisExample() {
+    return <BiasAnalysisUI detailedBiasAnalysis={detailedBiasAnalysis} />
 }
 

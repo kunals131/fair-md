@@ -4,6 +4,8 @@ import Papa from "papaparse";
 import { useRouter } from "next/router";
 import type { GetServerSideProps, NextPage } from "next";
 import RootLayout from "@/components/layout";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const allowedExtensions = ["csv", "json"] as const;
 
@@ -109,7 +111,8 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
     );
 };
 
-const PreProcess = async (uploaded: File) => {
+const PreProcess = async (uploaded: File, setData: any) => {
+    console.log(uploaded, "PRE_PROCESS")
     return new Promise<void>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = async ({ target }) => {
@@ -119,22 +122,9 @@ const PreProcess = async (uploaded: File) => {
             }
             const csv = Papa.parse(target.result, { header: true });
             const data = csv?.data as Record<string, string>[];
-
-            const dict: Record<string, string> = {};
-            for (let i = 0; i < data.length; ++i) {
-                if (data[i]["OEM"]) {
-                    data[i]["OEM"] = data[i]["OEM"].split("-")[0];
-                }
-                if (data[i]["Country"]) {
-                    if (!data[i]["Region"]) {
-                        if (dict[data[i]["Country"]]) {
-                            data[i]["Region"] = dict[data[i]["Country"]];
-                        }
-                    } else {
-                        dict[data[i]["Country"]] = data[i]["Region"];
-                    }
-                }
-            }
+            console.log(data, "PRE_PROCESS")
+            setData(data);
+            console.log(data)
 
             const csvData = new Blob([Papa.unparse(data)], {
                 type: "text/csv;charset=utf-8;",
@@ -179,8 +169,10 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
     const [error, setError] = useState<string>("");
     const [uploaded, setUploaded] = useState<File | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-
+    const [preProcessedData, setPreProcessedData] = useState<any>(null)
+    console.log("PPPRESE", preProcessedData)
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        PreProcess(e.target.files?.[0] as any, setPreProcessedData)
         setError("");
         setLoading(true);
         const files = e.target.files;
@@ -210,8 +202,8 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
 
         setLoading(true);
         // Optionally preprocess the file here if needed:
-        // await PreProcess(uploaded);
-
+        const data = await PreProcess(uploaded, setPreProcessedData);
+        console.log("Data:", data);
         // Upload the file to Cloudinary (example)
         const formData = new FormData();
         formData.append("file", uploaded);
@@ -242,6 +234,22 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
         setError("");
         setLoading(false);
     };
+
+    const handleSubmit = async () => {
+        try {
+            setLoading(true);
+            const repsonse = await axios.post("/api/analysis", {
+                userQuery: JSON.stringify(preProcessedData),
+            });
+            toast.success("Data processed successfully!");
+            localStorage.setItem("analysis", JSON.stringify(repsonse.data));
+            router.push("/analysis");
+        } catch (err) {
+            toast.error("Error in analysis API");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <RootLayout>
@@ -277,8 +285,8 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
                         <div className="flex space-x-7">
                             <div>
                                 <button
-                                    className="px-2 py-1 bg-white text-bgcolor rounded-md"
-                                    onClick={handleContinue}
+                                    className="px-2 py-1 bg-indigo-600 text-bgcolor rounded-md"
+                                    onClick={handleSubmit}
                                     disabled={loading}
                                 >
                                     {loading ? "loading" : "Continue"}
