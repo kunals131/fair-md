@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import Papa from "papaparse";
 import { useRouter } from "next/router";
@@ -241,7 +241,7 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
     const handleTestCases = async () => {
         try {
             setLoading(true);
-            const response = await axios.post("/api/analysis", {
+            const response = await axios.post("/api/testcases", {
                 userQuery: JSON.stringify(preProcessedData),
                 intent: "testcases",
             });
@@ -271,7 +271,6 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
             setLoading(false);
         }
     }
-
 
 
     console.log(testCases, "TEST_CASES")

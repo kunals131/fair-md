@@ -1,10 +1,13 @@
 import BiasAnalysisDashboard from '@/components/BiasAnalysisDashboard'
+import Feedback from '@/components/Feedback'
 import Graph from '@/components/Graph'
 import { GRAPH_TYPES } from '@/components/Graph/utils'
 import RootLayout from '@/components/layout'
 import Stats from '@/components/Stats'
+import Tabs from '@/components/Tabs'
 import { MultiStepLoader } from '@/components/ui/multi-step-loader'
-import React, { useEffect } from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 
 
 const DUMMY_DATA = {
@@ -146,6 +149,7 @@ const Analysis = () => {
     const [data, setData] = React.useState(null)
     const [testcases, setTestcases] = React.useState<any>({ testCases: [] })
     const [isLoading, setIsLoading] = React.useState(true)
+    const [activeTab, setActiveTab] = React.useState("analysis")
 
     useEffect(() => {
         setTimeout(() => {
@@ -166,6 +170,30 @@ const Analysis = () => {
     }, [])
 
     console.log(testcases?.testCases, " TC")
+
+    // const [feedback, setFeedback] = useState<any>(null);
+    // const [isFeedbackLoading, setIsFeedbackLoading] = useState<boolean>(false);
+
+    // const fetchFeedbackData = () => {
+    //     setIsFeedbackLoading(true);
+    //     axios.post("/api/feedback")
+    //         .then((response) => {
+    //             setFeedback(response?.data ?? "");
+    //             localStorage.setItem('feedback', JSON.stringify(response.data));
+    //             setIsFeedbackLoading(false);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching feedback data:", error);
+    //             setIsFeedbackLoading(false);
+    //         }).finally(() => {
+    //             setIsFeedbackLoading(false);
+    //         });
+    // }
+
+    // useEffect(() => {
+    //     fetchFeedbackData();
+    // }, [])
+
     if (!data) {
         return null;
     }
@@ -173,13 +201,20 @@ const Analysis = () => {
         <RootLayout>
             {
                 isLoading && testcases && <MultiStepLoader
-                    loadingStates={testcases?.testCases?.map(item => ({ text: item?.title }))}
+                    loadingStates={testcases?.testCases?.map((item: any) => ({ text: item?.title }))}
                     duration={1500}
                     loading={isLoading}
                     loop
                 />
             }
-            {!isLoading && <>
+            <div className='mb-12'>
+                <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            </div>
+            {
+                !isLoading && activeTab === 'feedback' && <Feedback />
+            }
+            {!isLoading && activeTab === 'analysis' && <>
+
                 <div className='text-lg font-semibold'>Analysis summary</div>
                 <div className='-translate-x-[10px]'>
                     <Stats data={DUMMY_DATA?.bias_highlights?.map(item => ({ label: item.bias_factor, value: item.score }))} />
