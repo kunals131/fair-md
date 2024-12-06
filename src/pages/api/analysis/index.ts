@@ -35,6 +35,13 @@ export default async function handler(
     if (!userQuery) {
       return res.status(400).json({ message: 'User query is required' });
     }
+    // let response = { message: 'No response from LLM' };
+    // if (intent === "analysis") {
+    //   response = await callGPT(userQuery, prompts.ANALYSIS_PROMPT);
+    // }
+    // if (intent === "testcases") {
+    //   response = await callGPT(userQuery, prompts.TESTCASES_PROMPT);
+    // }
 
     const response = await callGPT(userQuery, prompts.ANALYSIS_PROMPT);
     await dbConnect();
