@@ -3,6 +3,7 @@ import Graph from '@/components/Graph'
 import { GRAPH_TYPES } from '@/components/Graph/utils'
 import RootLayout from '@/components/layout'
 import Stats from '@/components/Stats'
+import { MultiStepLoader } from '@/components/ui/multi-step-loader'
 import React, { useEffect } from 'react'
 
 
@@ -143,36 +144,59 @@ const DUMMY_DATA = {
 
 const Analysis = () => {
     const [data, setData] = React.useState(null)
+    const [testcases, setTestcases] = React.useState<any>({ testCases: [] })
+    const [isLoading, setIsLoading] = React.useState(true)
+
+    useEffect(() => {
+        setTimeout(() => {
+            setIsLoading(false)
+        }, 1200 * 10)
+    }, [])
 
     useEffect(() => {
         const item = localStorage.getItem('analysis');
+        const tc = localStorage.getItem('testcases');
+        if (tc) {
+            setTestcases(JSON.parse(tc));
+            console.log(tc, "TCC")
+        }
         if (item) {
             setData(JSON.parse(item));
         }
     }, [])
 
+    console.log(testcases?.testCases, " TC")
     if (!data) {
         return null;
     }
     return (
         <RootLayout>
-            <div className='text-lg font-semibold'>Analysis summary</div>
-            <div className='-translate-x-[10px]'>
-                <Stats data={DUMMY_DATA?.bias_highlights?.map(item => ({ label: item.bias_factor, value: item.score }))} />
-            </div>
-            <div className='mt-4 text-base opacity-80'>
-                The analysis highlights significant biases in Access Disparities and Technological Literacy. Elderly patients and those from low socioeconomic statuses, especially in rural areas with poor internet connectivity, face challenges accessing telemedicine effectively
-            </div>
-            <main className="mt-5">
-                <Graph type={GRAPH_TYPES.BAR_CHART} labels={DUMMY_DATA.data_for_graphs?.map(item => item.bias_factor)} datasets={[{
-                    label: 'Bias Scores',
-                    data: DUMMY_DATA.data_for_graphs?.map(item => item.score * 100),
-                    backgroundColor: '#429FAD',
-                    borderColor: 'blue',
-                }]} />
-                <BiasAnalysisDashboard detailedBiasAnalysis={(data as any)?.detailed_bias_analysis} />
-            </main>
-
+            {
+                isLoading && testcases && <MultiStepLoader
+                    loadingStates={testcases?.testCases?.map(item => ({ text: item?.title }))}
+                    duration={1500}
+                    loading={isLoading}
+                    loop
+                />
+            }
+            {!isLoading && <>
+                <div className='text-lg font-semibold'>Analysis summary</div>
+                <div className='-translate-x-[10px]'>
+                    <Stats data={DUMMY_DATA?.bias_highlights?.map(item => ({ label: item.bias_factor, value: item.score }))} />
+                </div>
+                <div className='mt-4 text-base opacity-80'>
+                    The analysis highlights significant biases in Access Disparities and Technological Literacy. Elderly patients and those from low socioeconomic statuses, especially in rural areas with poor internet connectivity, face challenges accessing telemedicine effectively
+                </div>
+                <main className="mt-5">
+                    <Graph type={GRAPH_TYPES.BAR_CHART} labels={DUMMY_DATA.data_for_graphs?.map(item => item.bias_factor)} datasets={[{
+                        label: 'Bias Scores',
+                        data: DUMMY_DATA.data_for_graphs?.map(item => item.score * 100),
+                        backgroundColor: '#429FAD',
+                        borderColor: 'blue',
+                    }]} />
+                    <BiasAnalysisDashboard detailedBiasAnalysis={(data as any)?.detailed_bias_analysis} />
+                </main>
+            </>}
         </RootLayout>
     )
 }

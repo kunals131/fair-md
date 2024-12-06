@@ -38,19 +38,16 @@ const BiasAnalysisUI: React.FC<BiasAnalysisProps> = ({ detailedBiasAnalysis }) =
         <div className="container mx-auto mt-12 p-4 space-y-4">
             <h1 className="text-xl font-semubold mb-4">Bias Breakdown</h1>
             {detailedBiasAnalysis.map((factor, index) => (
-                <Card key={index} className="w-full bg-black/20 p-0 border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                        <CardTitle className="text-lg font-medium text-white">{factor.bias_factor}</CardTitle>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className='bg-gray-700 text-white'
-                            onClick={() => toggleFactor(factor.bias_factor)}
-                        >
-                            {expandedFactors[factor.bias_factor] ? <ChevronUp /> : <ChevronDown />}
-                        </Button>
-                    </CardHeader>
-                    <CardContent className='text-white flex flex-col gap-4'>
+                <div key={index} className="w-full bg-black/10 cursor-pointer hover:scale-[1.01] duration-300 transition-all p-0 rounded-lg border border-white/5">
+                    <div onClick={() => toggleFactor(factor?.bias_factor)} className="flex items-center justify-between py-4 px-4  font-medium border-gray-700">
+                        <div>{factor.bias_factor}</div>
+                        <div className='bg-black/20 rounded-lg w-[32px] h-[32px] flex items-center justify-center'>
+                            {
+                                expandedFactors[factor.bias_factor] ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                            }
+                        </div>
+                    </div>
+                    {expandedFactors[factor.bias_factor] && <CardContent className='text-white flex flex-col gap-4'>
                         {expandedFactors[factor.bias_factor] && factor.sub_factors.map((subFactor, subIndex) => (
                             <div key={subIndex} className="mt-4 space-y-4">
                                 <h3 className="font-medium">{subFactor.sub_factor || factor.bias_factor}</h3>
@@ -63,8 +60,8 @@ const BiasAnalysisUI: React.FC<BiasAnalysisProps> = ({ detailedBiasAnalysis }) =
                                 <p className="text-sm"><strong>Recommendations:</strong> {subFactor.recommendations}</p>
                             </div>
                         ))}
-                    </CardContent>
-                </Card>
+                    </CardContent>}
+                </div>
             ))}
         </div>
     )

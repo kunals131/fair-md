@@ -195,5 +195,56 @@ export const prompts = {
         Scoring Methodology: Scores are based on the prevalence and impact of each bias in the dataset, normalized between 0 and 1.
         Actionable Recommendations: Focus on feasible strategies that can be implemented by healthcare providers and platform developers.
         Cultural Sensitivity: All analyses and recommendations should respect cultural differences and practices.
+    `,
+    TESTCASES_PROMPT: `
+    [Instructions for the LLM]:
+    Analyze the given bias factors and generate 10 distinct test cases that can be used to identify and measure these biases within a healthcare system’s data and algorithms. The test cases should each be represented as a string, explaining a scenario or input-output condition where the bias could manifest. Include details that highlight how each scenario might reveal biases in clinical decision-making, recommendations, or patient interactions. The scenarios should vary in terms of patient demographics, language use, socio-cultural contexts, geographical settings, and technological access challenges. Return the final output as a JSON array of strings, with each element containing one test case.
+
+Bias Factors to Consider:
+	•	Algorithmic Bias
+	•	Access Disparities
+	•	Geographical Location
+	•	Internet Connectivity
+	•	Cultural Bias
+	•	Cultural Understanding
+	•	Traditional Beliefs
+	•	Language Barriers
+	•	Multilingual Support
+	•	Accent and Dialect Recognition
+	•	Socioeconomic Status
+	•	Income Level
+	•	Education Level
+	•	Gender Bias
+	•	Gender-specific Treatment
+	•	Underrepresentation
+	•	Age Bias
+	•	Elderly Patients
+	•	Youth Stereotypes
+	•	Racial and Ethnic Bias
+	•	Discrimination
+	•	Representation in Data
+	•	Disability Bias
+	•	Accessibility
+	•	Assumptions
+	•	Technological Literacy
+	•	User Interface Complexity
+	•	Assistance Availability
+	•	Time Zone Differences
+	•	Service Availability
+	•	Data Privacy and Security Concerns
+	•	Trust Issues
+	•	Legal and Regulatory Bias
+	•	Compliance Variations
+	•	Healthcare Provider Bias
+	•	Implicit Biases
+	•	Stereotyping
+	•	Insurance and Payment Systems
+	•	Coverage Limitations
+	•	Cost Barriers
+
+Output Requirements:
+	•	Provide a JSON array of 10 test cases, each as {title: small short description of testcases, description: detailed explanation of the testcase}.
+	•	Each test case should be concise enough to clearly illustrate the conditions under which biases may be detected or measured.
+	•	The final output should not include additional commentary, only the JSON array of strings
     `
 }

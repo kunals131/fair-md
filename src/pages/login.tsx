@@ -1,3 +1,4 @@
+import { useRouter } from "next/router"
 import { useState } from "react"
 import toast from "react-hot-toast"
 import { TailSpin } from 'react-loader-spinner'
@@ -12,6 +13,7 @@ export default function Example() {
     const [password, setPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [isSignup, setIsSignup] = useState(false)
+    const router = useRouter();
     const handleSignup = () => {
         setIsSignup(!isSignup)
     }
@@ -49,7 +51,7 @@ export default function Example() {
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form action="#" method="POST" className="space-y-6">
+                    <form onSubmit={(e) => e.preventDefault()} action="#" method="POST" className="space-y-6">
                         <div>
                             <label htmlFor="email" className="block text-sm/6 font-medium text-white">
                                 Email address
@@ -97,7 +99,7 @@ export default function Example() {
                             <button
                                 type="submit"
                                 onClick={handleLogin}
-                                className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                                className="flex gap-4 w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                             >
                                 {isLoading && <TailSpin height={20} width={20} color="white" />}   {isLoading ? "Loading.." : "Login"}
                             </button>

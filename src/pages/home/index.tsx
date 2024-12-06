@@ -6,6 +6,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import RootLayout from "@/components/layout";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { TailSpin } from "react-loader-spinner";
 
 const allowedExtensions = ["csv", "json"] as const;
 
@@ -235,12 +236,32 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
         setLoading(false);
     };
 
+    const [testCases, setTestCases] = useState<string[]>([]);
+
+    const handleTestCases = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.post("/api/analysis", {
+                userQuery: JSON.stringify(preProcessedData),
+                intent: "testcases",
+            });
+            setTestCases(response?.data);
+            toast.success("Test cases generated successfully!");
+            localStorage.setItem("testcases", JSON.stringify(response.data));
+        } catch (err) {
+            toast.error("Error in test cases API");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async () => {
         try {
             setLoading(true);
             const repsonse = await axios.post("/api/analysis", {
                 userQuery: JSON.stringify(preProcessedData),
             });
+            await handleTestCases();
             toast.success("Data processed successfully!");
             localStorage.setItem("analysis", JSON.stringify(repsonse.data));
             router.push("/analysis");
@@ -250,6 +271,10 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
             setLoading(false);
         }
     }
+
+
+
+    console.log(testCases, "TEST_CASES")
 
     return (
         <RootLayout>
@@ -285,11 +310,12 @@ const NewAnalysis: NextPage<{ token: boolean }> = () => {
                         <div className="flex space-x-7">
                             <div>
                                 <button
-                                    className="px-2 py-1 bg-indigo-600 text-bgcolor rounded-md"
+                                    className="px-2 flex items-center gap-3 py-1.5 bg-indigo-600 text-bgcolor rounded-md"
                                     onClick={handleSubmit}
                                     disabled={loading}
                                 >
-                                    {loading ? "loading" : "Continue"}
+                                    {loading && <TailSpin height={16} width={16} color="white" />}
+                                    {loading ? "Generating Testcases.." : "Continue"}
                                 </button>
                             </div>
                             <div>
